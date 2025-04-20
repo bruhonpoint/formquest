@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>MCQ Generator with Shareable Link</title>
+  <title>Trắc Nghiệm Generator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 2rem auto;
       max-width: 800px;
+      margin: auto;
       padding: 20px;
     }
     textarea {
@@ -18,7 +18,8 @@
     }
     button {
       padding: 10px 15px;
-      margin: 10px 5px 0 0;
+      margin-top: 10px;
+      cursor: pointer;
     }
     .question-block {
       margin-top: 20px;
@@ -43,30 +44,30 @@
 </head>
 <body>
 
-  <h1>MCQ Generator from Pasted Text</h1>
+  <h1>Tạo câu hỏi trắc nghiệm</h1>
 
   <div id="inputSection">
-    <p>Paste your questions below. Format like this:</p>
+    <p>Dán câu hỏi của bạn vào bên dưới. Mỗi câu gồm 1 dòng câu hỏi và 4 dòng đáp án, ví dụ:</p>
     <pre>
-What is 2 + 2?
-A. 3
-*B. 4
-C. 5
-D. 6
+Câu hỏi ví dụ?
+A. Đáp án 1
+*B. Đáp án đúng
+C. Đáp án 3
+D. Đáp án 4
     </pre>
 
-    <textarea id="inputText" placeholder="Paste your questions here..."></textarea>
+    <textarea id="inputText" placeholder="Dán các câu hỏi vào đây..."></textarea>
     <br/>
-    <button onclick="generateMCQs()">Generate Questions</button>
+    <button onclick="generateMCQs()">Tạo câu hỏi</button>
   </div>
 
   <div id="editToggle" style="display:none;">
-    <button onclick="showInput()">✏️ Edit Questions</button>
+    <button onclick="showInput()">✏️ Edit câu hỏi</button>
   </div>
 
   <div id="quizContainer"></div>
   <div id="shareLink" style="display:none;">
-    <p>Share your quiz! Copy this link to share:</p>
+    <p>🔗 Chia sẻ bài trắc nghiệm:</p>
     <input type="text" id="quizLink" readonly />
   </div>
 
@@ -79,7 +80,7 @@ D. 6
 
     function generateMCQs() {
       const input = document.getElementById("inputText").value.trim();
-      const rawQuestions = input.split(/\n\s*\n/); // split by blank lines
+      const rawQuestions = input.split(/\n\s*\n/); // tách theo dòng trống
       parsedQuestions = [];
 
       rawQuestions.forEach(block => {
@@ -102,16 +103,10 @@ D. 6
         parsedQuestions.push({ question: questionText, choices, correct: correctIndex });
       });
 
-      // Shuffle questions
       parsedQuestions = shuffleArray(parsedQuestions);
-      
       renderQuiz();
-      
-      // Hide input section, show edit button
       document.getElementById("inputSection").style.display = "none";
       document.getElementById("editToggle").style.display = "block";
-      
-      // Show shareable link
       generateShareableLink();
     }
 
@@ -131,7 +126,7 @@ D. 6
         blockEl.className = "question-block";
         blockEl.dataset.correct = q.correct;
         blockEl.dataset.index = qIndex;
-        blockEl.innerHTML = `<strong>Q${qIndex + 1}: ${q.question}</strong><br/>`;
+        blockEl.innerHTML = `<p><strong>${q.question}</strong></p>`;
 
         q.choices.forEach((choice, cIndex) => {
           const inputId = `q${qIndex}c${cIndex}`;
@@ -147,7 +142,7 @@ D. 6
       });
 
       const checkAllBtn = document.createElement("button");
-      checkAllBtn.textContent = "✅ Check All Answers";
+      checkAllBtn.textContent = "✅ Kiểm tra";
       checkAllBtn.onclick = checkAllAnswers;
       quizContainer.appendChild(checkAllBtn);
     }
@@ -173,7 +168,7 @@ D. 6
     function generateShareableLink() {
       const urlData = JSON.stringify(parsedQuestions);
       const encodedData = encodeURIComponent(urlData);
-      const link = `${window.location.href}?quiz=${encodedData}`;
+      const link = `${window.location.origin}${window.location.pathname}?quiz=${encodedData}`;
       document.getElementById("quizLink").value = link;
       document.getElementById("shareLink").style.display = "block";
     }
