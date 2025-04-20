@@ -4,59 +4,74 @@
   <meta charset="UTF-8" />
   <title>Trắc Nghiệm Generator</title>
   <style>
-  body {
-    font-family: Arial, sans-serif;
-    max-width: 800px;
-    margin: auto;
-    padding: 20px;
-    font-size: 16px;
-  }
-  textarea {
-    width: 100%;
-    height: 200px;
-    padding: 10px;
-    font-family: monospace;
-    font-size: 1rem;
-  }
-  button {
-    padding: 10px 15px;
-    margin-top: 10px;
-    font-size: 1rem;
-    cursor: pointer;
-  }
-  .question-block {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-  }
-  .question-block.correct {
-    background-color: #e0ffe0;
-  }
-  .question-block.incorrect {
-    background-color: #ffe0e0;
-  }
-  .choice {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 1.2rem;
-    line-height: 1.6;
-  }
-  #quizContainer {
-    margin-top: 30px;
-  }
-  @media (max-width: 600px) {
     body {
-      font-size: 1.1rem;
-    }
-    .choice {
-      font-size: 1.25rem;
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+      font-size: 16px;
     }
     textarea {
+      width: 100%;
+      height: 200px;
+      padding: 10px;
+      font-family: monospace;
       font-size: 1rem;
+      box-sizing: border-box;
     }
-  }
-</style>
+    button {
+      padding: 10px 15px;
+      margin-top: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    .question-block {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .question-block.correct {
+      background-color: #e0ffe0;
+    }
+    .question-block.incorrect {
+      background-color: #ffe0e0;
+    }
+    .choice {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 1.2rem;
+      line-height: 1.6;
+    }
+    #quizContainer {
+      margin-top: 30px;
+    }
+    #feedback {
+      margin-top: 30px;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 1.1rem;
+        padding: 10px;
+      }
+      .choice {
+        font-size: 1.25rem;
+      }
+      textarea, input[type="text"], button {
+        width: 100%;
+        font-size: 1rem;
+      }
+      .question-block {
+        padding: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -82,6 +97,9 @@ D. Đáp án 4
   </div>
 
   <div id="quizContainer"></div>
+
+  <div id="feedback"></div>
+
   <div id="shareLink" style="display:none;">
     <p>🔗 Chia sẻ bài trắc nghiệm:</p>
     <input type="text" id="quizLink" readonly />
@@ -130,6 +148,7 @@ D. Đáp án 4
       document.getElementById("inputSection").style.display = "block";
       document.getElementById("editToggle").style.display = "none";
       document.getElementById("quizContainer").innerHTML = "";
+      document.getElementById("feedback").innerHTML = "";
       document.getElementById("shareLink").style.display = "none";
     }
 
@@ -165,11 +184,16 @@ D. Đáp án 4
 
     function checkAllAnswers() {
       const blocks = document.querySelectorAll(".question-block");
+      const feedback = document.getElementById("feedback");
+      feedback.innerHTML = ""; // Clear cũ
+
+      let incorrectList = [];
 
       blocks.forEach(block => {
         const qIndex = block.dataset.index;
         const correct = parseInt(block.dataset.correct);
         const selected = document.querySelector(`input[name="quiz${qIndex}"]:checked`);
+        const question = parsedQuestions[qIndex];
 
         block.classList.remove("correct", "incorrect");
 
@@ -177,8 +201,19 @@ D. Đáp án 4
           block.classList.add("correct");
         } else {
           block.classList.add("incorrect");
+          const correctAnswer = question.choices[correct];
+          incorrectList.push(`<li><strong>${question.question}</strong><br/>✅ Đáp án đúng: ${correctAnswer}</li>`);
         }
       });
+
+      if (incorrectList.length > 0) {
+        feedback.innerHTML = `
+          <h3>❌ Bạn trả lời sai các câu sau:</h3>
+          <ul>${incorrectList.join("")}</ul>
+        `;
+      } else {
+        feedback.innerHTML = `<h3>🎉 Tất cả câu đều đúng!</h3>`;
+      }
     }
 
     function generateShareableLink() {
