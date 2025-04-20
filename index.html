@@ -4,69 +4,144 @@
   <meta charset="UTF-8" />
   <title>Trắc Nghiệm Generator</title>
   <style>
+    :root {
+      --blue: #2c7be5;
+      --green: #28a745;
+      --red: #ffbaba;
+      --pastel1: #f0f8ff;
+      --pastel2: #e6f0ff;
+      --pastel3: #fffaf0;
+      --correct-bg: #d4edda;
+      --incorrect-bg: #f8d7da;
+    }
+
     body {
       font-family: Arial, sans-serif;
+      background-color: var(--pastel1);
       max-width: 800px;
       margin: auto;
       padding: 20px;
       font-size: 16px;
+      color: #333;
     }
+
+    h1 {
+      color: var(--blue);
+    }
+
+    .settings {
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: var(--pastel2);
+      border-radius: 8px;
+    }
+
+    .settings label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
     textarea {
       width: 100%;
       height: 200px;
       padding: 10px;
       font-family: monospace;
       font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background-color: white;
       box-sizing: border-box;
     }
+
     button {
       padding: 10px 15px;
       margin-top: 10px;
       font-size: 1rem;
       cursor: pointer;
+      border: none;
+      background-color: var(--blue);
+      color: white;
+      border-radius: 6px;
     }
+
+    button:hover {
+      background-color: #1a5ecc;
+    }
+
     input[type="text"] {
       width: 100%;
       padding: 8px;
       font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
       box-sizing: border-box;
     }
+
     .question-block {
       margin-top: 20px;
       padding: 15px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+      border: 2px solid #add8e6;
+      border-radius: 12px;
+      background-color: var(--pastel3);
+      transition: background-color 0.3s ease;
     }
+
     .question-block.correct {
-      background-color: #e0ffe0;
+      background-color: var(--correct-bg);
     }
+
     .question-block.incorrect {
-      background-color: #ffe0e0;
+      background-color: var(--incorrect-bg);
     }
+
     .choice {
       display: block;
       margin-bottom: 8px;
       font-size: 1.2rem;
       line-height: 1.6;
     }
+
     #quizContainer {
       margin-top: 30px;
     }
+
     #feedback {
       margin-top: 30px;
     }
+
+    .feedback-card {
+      background-color: #fff8e1;
+      border-left: 5px solid var(--red);
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .feedback-card p {
+      margin: 0 0 5px;
+    }
+
+    .feedback-card .correct-answer {
+      color: var(--green);
+      font-weight: bold;
+    }
+
     @media (max-width: 600px) {
       body {
         font-size: 1.1rem;
         padding: 10px;
       }
+
       .choice {
         font-size: 1.25rem;
       }
+
       textarea, input[type="text"], button {
         width: 100%;
         font-size: 1rem;
       }
+
       .question-block {
         padding: 10px;
       }
@@ -76,6 +151,12 @@
 <body>
 
   <h1>Tạo câu hỏi trắc nghiệm</h1>
+
+  <div class="settings">
+    <h3>⚙️ Tuỳ chỉnh:</h3>
+    <label><input type="checkbox" id="shuffleQuestions" checked> Xáo trộn câu hỏi</label>
+    <label><input type="checkbox" id="shuffleChoices" checked> Xáo trộn đáp án</label>
+  </div>
 
   <div id="inputSection">
     <p>Dán câu hỏi của bạn vào bên dưới. Mỗi câu gồm 1 dòng câu hỏi và 4 dòng đáp án, ví dụ:</p>
@@ -93,11 +174,10 @@ D. Đáp án 4
   </div>
 
   <div id="editToggle" style="display:none;">
-    <button onclick="showInput()">✏️ Edit câu hỏi</button>
+    <button onclick="showInput()">✏️ Chỉnh sửa câu hỏi</button>
   </div>
 
   <div id="quizContainer"></div>
-
   <div id="feedback"></div>
 
   <div id="shareLink" style="display:none;">
@@ -114,15 +194,18 @@ D. Đáp án 4
 
     function generateMCQs() {
       const input = document.getElementById("inputText").value.trim();
-      const rawQuestions = input.split(/\n\s*\n/); // tách theo dòng trống
+      const rawQuestions = input.split(/\n\s*\n/);
       parsedQuestions = [];
+
+      const doShuffleQuestions = document.getElementById("shuffleQuestions").checked;
+      const doShuffleChoices = document.getElementById("shuffleChoices").checked;
 
       rawQuestions.forEach(block => {
         const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
         if (lines.length < 2) return;
 
         const questionText = lines[0];
-        const choices = [];
+        let choices = [];
         let correctIndex = -1;
 
         lines.slice(1).forEach((line, i) => {
@@ -134,10 +217,20 @@ D. Đáp án 4
           choices.push(text);
         });
 
+        if (doShuffleChoices) {
+          const originalChoices = [...choices];
+          const originalCorrectAnswer = originalChoices[correctIndex];
+          choices = shuffleArray(choices);
+          correctIndex = choices.indexOf(originalCorrectAnswer);
+        }
+
         parsedQuestions.push({ question: questionText, choices, correct: correctIndex });
       });
 
-      parsedQuestions = shuffleArray(parsedQuestions);
+      if (doShuffleQuestions) {
+        parsedQuestions = shuffleArray(parsedQuestions);
+      }
+
       renderQuiz();
       document.getElementById("inputSection").style.display = "none";
       document.getElementById("editToggle").style.display = "block";
@@ -185,7 +278,7 @@ D. Đáp án 4
     function checkAllAnswers() {
       const blocks = document.querySelectorAll(".question-block");
       const feedback = document.getElementById("feedback");
-      feedback.innerHTML = ""; // Clear cũ
+      feedback.innerHTML = "";
 
       let incorrectList = [];
 
@@ -202,17 +295,22 @@ D. Đáp án 4
         } else {
           block.classList.add("incorrect");
           const correctAnswer = question.choices[correct];
-          incorrectList.push(`<li><strong>${question.question}</strong><br/>✅ Đáp án đúng: ${correctAnswer}</li>`);
+          incorrectList.push(`
+            <div class="feedback-card">
+              <p><strong>${question.question}</strong></p>
+              <p class="correct-answer">✅ Đáp án đúng: ${correctAnswer}</p>
+            </div>
+          `);
         }
       });
 
       if (incorrectList.length > 0) {
         feedback.innerHTML = `
           <h3>❌ Bạn trả lời sai các câu sau:</h3>
-          <ul>${incorrectList.join("")}</ul>
+          ${incorrectList.join("")}
         `;
       } else {
-        feedback.innerHTML = `<h3>🎉 Tất cả câu đều đúng!</h3>`;
+        feedback.innerHTML = `<h3>🎉 Tất cả câu đều đúng! Giỏi quá!</h3>`;
       }
     }
 
