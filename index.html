@@ -4,43 +4,59 @@
   <meta charset="UTF-8" />
   <title>Trắc Nghiệm Generator</title>
   <style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    font-size: 16px;
+  }
+  textarea {
+    width: 100%;
+    height: 200px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 1rem;
+  }
+  button {
+    padding: 10px 15px;
+    margin-top: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .question-block {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  .question-block.correct {
+    background-color: #e0ffe0;
+  }
+  .question-block.incorrect {
+    background-color: #ffe0e0;
+  }
+  .choice {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 1.2rem;
+    line-height: 1.6;
+  }
+  #quizContainer {
+    margin-top: 30px;
+  }
+  @media (max-width: 600px) {
     body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: auto;
-      padding: 20px;
-    }
-    textarea {
-      width: 100%;
-      height: 200px;
-      padding: 10px;
-      font-family: monospace;
-    }
-    button {
-      padding: 10px 15px;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-    .question-block {
-      margin-top: 20px;
-      padding: 15px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-    .question-block.correct {
-      background-color: #e0ffe0;
-    }
-    .question-block.incorrect {
-      background-color: #ffe0e0;
+      font-size: 1.1rem;
     }
     .choice {
-      display: block;
-      margin-bottom: 5px;
+      font-size: 1.25rem;
     }
-    #quizContainer {
-      margin-top: 30px;
+    textarea {
+      font-size: 1rem;
     }
-  </style>
+  }
+</style>
 </head>
 <body>
 
