@@ -101,12 +101,29 @@
       line-height: 1.6;
     }
 
-    #quizContainer {
-      margin-top: 30px;
+    #quizSection {
+      display: none;
+      animation: fadeSlideIn 0.5s ease forwards;
     }
 
-    #feedback {
-      margin-top: 30px;
+    @keyframes fadeSlideIn {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .quiz-header {
+      background-color: var(--blue);
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
     }
 
     .feedback-card {
@@ -116,10 +133,6 @@
       margin-bottom: 15px;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    .feedback-card p {
-      margin: 0 0 5px;
     }
 
     .feedback-card .correct-answer {
@@ -149,16 +162,14 @@
   </style>
 </head>
 <body>
-
   <h1>Tạo câu hỏi trắc nghiệm</h1>
-
-  <div class="settings">
-    <h3>⚙️ Tuỳ chỉnh:</h3>
-    <label><input type="checkbox" id="shuffleQuestions" checked> Xáo trộn câu hỏi</label>
-    <label><input type="checkbox" id="shuffleChoices" checked> Xáo trộn đáp án</label>
-  </div>
-
   <div id="inputSection">
+    <div class="settings">
+      <h3>⚙️ Tuỳ chỉnh:</h3>
+      <label><input type="checkbox" id="shuffleQuestions" checked> Xáo trộn câu hỏi</label>
+      <label><input type="checkbox" id="shuffleChoices" checked> Xáo trộn đáp án</label>
+    </div>
+
     <p>Dán câu hỏi của bạn vào bên dưới. Mỗi câu gồm 1 dòng câu hỏi và 4 dòng đáp án, ví dụ:</p>
     <pre>
 Câu hỏi ví dụ?
@@ -173,16 +184,13 @@ D. Đáp án 4
     <button onclick="generateMCQs()">Tạo câu hỏi</button>
   </div>
 
-  <div id="editToggle" style="display:none;">
-    <button onclick="showInput()">✏️ Chỉnh sửa câu hỏi</button>
-  </div>
-
-  <div id="quizContainer"></div>
-  <div id="feedback"></div>
-
-  <div id="shareLink" style="display:none;">
-    <p>🔗 Chia sẻ bài trắc nghiệm:</p>
-    <input type="text" id="quizLink" readonly />
+  <div id="quizSection">
+    <div class="quiz-header">
+      <h2>📝 Bắt đầu làm bài trắc nghiệm</h2>
+    </div>
+    <div id="quizContainer"></div>
+    <div id="feedback"></div>
+    <div style="margin-top: 20px;"><button onclick="showInput()">✏️ Quay lại chỉnh sửa</button></div>
   </div>
 
   <script>
@@ -231,30 +239,29 @@ D. Đáp án 4
         parsedQuestions = shuffleArray(parsedQuestions);
       }
 
-      renderQuiz();
       document.getElementById("inputSection").style.display = "none";
-      document.getElementById("editToggle").style.display = "block";
-      generateShareableLink();
+      document.getElementById("quizSection").style.display = "block";
+
+      renderQuiz();
     }
 
     function showInput() {
       document.getElementById("inputSection").style.display = "block";
-      document.getElementById("editToggle").style.display = "none";
-      document.getElementById("quizContainer").innerHTML = "";
-      document.getElementById("feedback").innerHTML = "";
-      document.getElementById("shareLink").style.display = "none";
+      document.getElementById("quizSection").style.display = "none";
     }
 
     function renderQuiz() {
       const quizContainer = document.getElementById("quizContainer");
+      const feedback = document.getElementById("feedback");
       quizContainer.innerHTML = "";
+      feedback.innerHTML = "";
 
       parsedQuestions.forEach((q, qIndex) => {
         const blockEl = document.createElement("div");
         blockEl.className = "question-block";
         blockEl.dataset.correct = q.correct;
         blockEl.dataset.index = qIndex;
-        blockEl.innerHTML = `<p><strong>${q.question}</strong></p>`;
+        blockEl.innerHTML = `<p><strong>Câu ${qIndex + 1}: ${q.question}</strong></p>`;
 
         q.choices.forEach((choice, cIndex) => {
           const inputId = `q${qIndex}c${cIndex}`;
@@ -270,8 +277,9 @@ D. Đáp án 4
       });
 
       const checkAllBtn = document.createElement("button");
-      checkAllBtn.textContent = "✅ Kiểm tra";
+      checkAllBtn.textContent = "✅ Kiểm tra kết quả";
       checkAllBtn.onclick = checkAllAnswers;
+      checkAllBtn.style.marginTop = "20px";
       quizContainer.appendChild(checkAllBtn);
     }
 
@@ -313,15 +321,6 @@ D. Đáp án 4
         feedback.innerHTML = `<h3>🎉 Tất cả câu đều đúng! Giỏi quá!</h3>`;
       }
     }
-
-    function generateShareableLink() {
-      const urlData = JSON.stringify(parsedQuestions);
-      const encodedData = encodeURIComponent(urlData);
-      const link = `${window.location.origin}${window.location.pathname}?quiz=${encodedData}`;
-      document.getElementById("quizLink").value = link;
-      document.getElementById("shareLink").style.display = "block";
-    }
   </script>
-
 </body>
 </html>
