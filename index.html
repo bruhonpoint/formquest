@@ -2,38 +2,69 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>Trắc Nghiệm Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trắc Nghiệm</title>
   <style>
     :root {
       --blue: #2c7be5;
       --green: #28a745;
-      --red: #ffbaba;
-      --pastel1: #f0f8ff;
-      --pastel2: #e6f0ff;
-      --pastel3: #fffaf0;
-      --correct-bg: #d4edda;
-      --incorrect-bg: #f8d7da;
+      --red: #dc3545;
+      --bg-edit: #f0f8ff;
+      --bg-quiz: #fffaf0;
     }
 
     body {
       font-family: Arial, sans-serif;
-      background-color: var(--pastel1);
+      margin: 0;
+      background: var(--bg-edit);
+      color: #333;
+    }
+
+    .container {
       max-width: 800px;
       margin: auto;
       padding: 20px;
-      font-size: 16px;
-      color: #333;
     }
 
     h1 {
       color: var(--blue);
     }
 
-    .settings {
-      margin-bottom: 15px;
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      background-color: var(--blue);
+      color: white;
+    }
+
+    button:hover {
+      background-color: #1a5ecc;
+    }
+
+    textarea, input[type="text"] {
+      width: 100%;
       padding: 10px;
-      background-color: var(--pastel2);
-      border-radius: 8px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .section {
+      display: none;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.5s ease;
+    }
+
+    .section.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .settings label {
@@ -41,286 +72,195 @@
       margin-bottom: 5px;
     }
 
-    textarea {
-      width: 100%;
-      height: 200px;
-      padding: 10px;
-      font-family: monospace;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      background-color: white;
-      box-sizing: border-box;
-    }
-
-    button {
-      padding: 10px 15px;
-      margin-top: 10px;
-      font-size: 1rem;
-      cursor: pointer;
-      border: none;
-      background-color: var(--blue);
-      color: white;
-      border-radius: 6px;
-    }
-
-    button:hover {
-      background-color: #1a5ecc;
-    }
-
-    input[type="text"] {
-      width: 100%;
-      padding: 8px;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-sizing: border-box;
-    }
-
     .question-block {
-      margin-top: 20px;
+      background: #f9f9f9;
+      border-left: 5px solid var(--blue);
+      margin-bottom: 15px;
       padding: 15px;
-      border: 2px solid #add8e6;
-      border-radius: 12px;
-      background-color: var(--pastel3);
-      transition: background-color 0.3s ease;
-    }
-
-    .question-block.correct {
-      background-color: var(--correct-bg);
-    }
-
-    .question-block.incorrect {
-      background-color: var(--incorrect-bg);
+      border-radius: 8px;
     }
 
     .choice {
       display: block;
-      margin-bottom: 8px;
-      font-size: 1.2rem;
-      line-height: 1.6;
+      margin: 8px 0;
     }
 
-    #quizSection {
-      display: none;
-      animation: fadeSlideIn 0.5s ease forwards;
-    }
+    .correct { background-color: #d4edda; }
+    .incorrect { background-color: #f8d7da; }
 
-    @keyframes fadeSlideIn {
-      0% {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .quiz-header {
-      background-color: var(--blue);
-      color: white;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .feedback-card {
-      background-color: #fff8e1;
-      border-left: 5px solid var(--red);
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    .feedback-card .correct-answer {
-      color: var(--green);
+    .timer {
       font-weight: bold;
+      color: var(--red);
+      margin-bottom: 10px;
     }
 
     @media (max-width: 600px) {
-      body {
-        font-size: 1.1rem;
-        padding: 10px;
-      }
-
-      .choice {
-        font-size: 1.25rem;
-      }
-
-      textarea, input[type="text"], button {
-        width: 100%;
-        font-size: 1rem;
-      }
-
-      .question-block {
-        padding: 10px;
-      }
+      body { font-size: 1.1rem; }
+      button { width: 100%; }
     }
   </style>
 </head>
 <body>
-  <h1>Tạo câu hỏi trắc nghiệm</h1>
-  <div id="inputSection">
+
+<div class="container">
+
+  <!-- Section 1: Nhập câu hỏi -->
+  <div id="editSection" class="section active">
+    <h1>✍️ Nhập câu hỏi</h1>
     <div class="settings">
-      <h3>⚙️ Tuỳ chỉnh:</h3>
       <label><input type="checkbox" id="shuffleQuestions" checked> Xáo trộn câu hỏi</label>
       <label><input type="checkbox" id="shuffleChoices" checked> Xáo trộn đáp án</label>
+      <label><input type="checkbox" id="customScore"> Tùy chỉnh điểm (không bắt buộc)</label>
+      <label><input type="checkbox" id="enableTimer"> Giới hạn thời gian</label>
+      <input type="number" id="timeLimit" placeholder="Nhập thời gian (phút)" min="1" style="display:none;">
     </div>
 
-    <p>Dán câu hỏi của bạn vào bên dưới. Mỗi câu gồm 1 dòng câu hỏi và 4 dòng đáp án, ví dụ:</p>
-    <pre>
-Câu hỏi ví dụ?
-A. Đáp án 1
-*B. Đáp án đúng
-C. Đáp án 3
-D. Đáp án 4
-    </pre>
+    <textarea id="inputText" rows="10" placeholder="Câu hỏi?&#10;A. Đáp án 1&#10;*B. Đáp án đúng&#10;C. Đáp án 3&#10;D. Đáp án 4"></textarea>
 
-    <textarea id="inputText" placeholder="Dán các câu hỏi vào đây..."></textarea>
-    <br/>
-    <button onclick="generateMCQs()">Tạo câu hỏi</button>
+    <button onclick="startQuiz()">▶️ Làm bài</button>
   </div>
 
-  <div id="quizSection">
-    <div class="quiz-header">
-      <h2>📝 Bắt đầu làm bài trắc nghiệm</h2>
-    </div>
+  <!-- Section 2: Làm bài -->
+  <div id="quizSection" class="section">
+    <h1>📝 Bắt đầu làm bài</h1>
+    <div class="timer" id="timer" style="display:none;"></div>
     <div id="quizContainer"></div>
-    <div id="feedback"></div>
-    <div style="margin-top: 20px;"><button onclick="showInput()">✏️ Quay lại chỉnh sửa</button></div>
+    <button onclick="checkAnswers()">✅ Nộp bài</button>
+    <button onclick="resetQuiz()" style="background-color: gray;">🔁 Làm lại</button>
+    <div id="result"></div>
   </div>
 
-  <script>
-    let parsedQuestions = [];
+</div>
 
-    function shuffleArray(array) {
-      return array.sort(() => Math.random() - 0.5);
-    }
+<script>
+  let parsedQuestions = [];
+  let timeLeft = 0;
+  let timerInterval;
 
-    function generateMCQs() {
-      const input = document.getElementById("inputText").value.trim();
-      const rawQuestions = input.split(/\n\s*\n/);
-      parsedQuestions = [];
+  document.getElementById("enableTimer").addEventListener("change", (e) => {
+    document.getElementById("timeLimit").style.display = e.target.checked ? "block" : "none";
+  });
 
-      const doShuffleQuestions = document.getElementById("shuffleQuestions").checked;
-      const doShuffleChoices = document.getElementById("shuffleChoices").checked;
+  function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+  }
 
-      rawQuestions.forEach(block => {
-        const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
-        if (lines.length < 2) return;
+  function startQuiz() {
+    const input = document.getElementById("inputText").value.trim();
+    const blocks = input.split(/\n\s*\n/);
+    const doShuffleQuestions = document.getElementById("shuffleQuestions").checked;
+    const doShuffleChoices = document.getElementById("shuffleChoices").checked;
 
-        const questionText = lines[0];
-        let choices = [];
-        let correctIndex = -1;
+    parsedQuestions = [];
 
-        lines.slice(1).forEach((line, i) => {
-          let text = line;
-          if (line.startsWith("*")) {
-            text = line.slice(1).trim();
-            correctIndex = i;
-          }
-          choices.push(text);
-        });
+    blocks.forEach(block => {
+      const lines = block.trim().split("\n").filter(Boolean);
+      if (lines.length < 2) return;
+      const question = lines[0];
+      let choices = [];
+      let correctIndex = -1;
 
-        if (doShuffleChoices) {
-          const originalChoices = [...choices];
-          const originalCorrectAnswer = originalChoices[correctIndex];
-          choices = shuffleArray(choices);
-          correctIndex = choices.indexOf(originalCorrectAnswer);
+      lines.slice(1).forEach((line, i) => {
+        let choice = line.trim();
+        if (choice.startsWith("*")) {
+          choice = choice.slice(1).trim();
+          correctIndex = i;
         }
-
-        parsedQuestions.push({ question: questionText, choices, correct: correctIndex });
+        choices.push(choice);
       });
 
-      if (doShuffleQuestions) {
-        parsedQuestions = shuffleArray(parsedQuestions);
+      if (doShuffleChoices) {
+        const correctAnswer = choices[correctIndex];
+        choices = shuffle(choices);
+        correctIndex = choices.indexOf(correctAnswer);
       }
 
-      document.getElementById("inputSection").style.display = "none";
-      document.getElementById("quizSection").style.display = "block";
+      parsedQuestions.push({ question, choices, correct: correctIndex });
+    });
 
-      renderQuiz();
+    if (doShuffleQuestions) parsedQuestions = shuffle(parsedQuestions);
+
+    document.getElementById("editSection").classList.remove("active");
+    document.getElementById("quizSection").classList.add("active");
+    renderQuiz();
+
+    if (document.getElementById("enableTimer").checked) {
+      const mins = parseInt(document.getElementById("timeLimit").value) || 1;
+      timeLeft = mins * 60;
+      document.getElementById("timer").style.display = "block";
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 1000);
     }
+  }
 
-    function showInput() {
-      document.getElementById("inputSection").style.display = "block";
-      document.getElementById("quizSection").style.display = "none";
-    }
-
-    function renderQuiz() {
-      const quizContainer = document.getElementById("quizContainer");
-      const feedback = document.getElementById("feedback");
-      quizContainer.innerHTML = "";
-      feedback.innerHTML = "";
-
-      parsedQuestions.forEach((q, qIndex) => {
-        const blockEl = document.createElement("div");
-        blockEl.className = "question-block";
-        blockEl.dataset.correct = q.correct;
-        blockEl.dataset.index = qIndex;
-        blockEl.innerHTML = `<p><strong>Câu ${qIndex + 1}: ${q.question}</strong></p>`;
-
-        q.choices.forEach((choice, cIndex) => {
-          const inputId = `q${qIndex}c${cIndex}`;
-          blockEl.innerHTML += `
-            <label class="choice">
-              <input type="radio" name="quiz${qIndex}" value="${cIndex}" id="${inputId}" />
-              ${choice}
-            </label>
-          `;
-        });
-
-        quizContainer.appendChild(blockEl);
-      });
-
-      const checkAllBtn = document.createElement("button");
-      checkAllBtn.textContent = "✅ Kiểm tra kết quả";
-      checkAllBtn.onclick = checkAllAnswers;
-      checkAllBtn.style.marginTop = "20px";
-      quizContainer.appendChild(checkAllBtn);
-    }
-
-    function checkAllAnswers() {
-      const blocks = document.querySelectorAll(".question-block");
-      const feedback = document.getElementById("feedback");
-      feedback.innerHTML = "";
-
-      let incorrectList = [];
-
-      blocks.forEach(block => {
-        const qIndex = block.dataset.index;
-        const correct = parseInt(block.dataset.correct);
-        const selected = document.querySelector(`input[name="quiz${qIndex}"]:checked`);
-        const question = parsedQuestions[qIndex];
-
-        block.classList.remove("correct", "incorrect");
-
-        if (selected && parseInt(selected.value) === correct) {
-          block.classList.add("correct");
-        } else {
-          block.classList.add("incorrect");
-          const correctAnswer = question.choices[correct];
-          incorrectList.push(`
-            <div class="feedback-card">
-              <p><strong>${question.question}</strong></p>
-              <p class="correct-answer">✅ Đáp án đúng: ${correctAnswer}</p>
-            </div>
-          `);
-        }
-      });
-
-      if (incorrectList.length > 0) {
-        feedback.innerHTML = `
-          <h3>❌ Bạn trả lời sai các câu sau:</h3>
-          ${incorrectList.join("")}
+  function renderQuiz() {
+    const container = document.getElementById("quizContainer");
+    container.innerHTML = "";
+    parsedQuestions.forEach((q, qIndex) => {
+      const div = document.createElement("div");
+      div.className = "question-block";
+      div.innerHTML = `<p><strong>${q.question}</strong></p>`;
+      q.choices.forEach((choice, cIndex) => {
+        div.innerHTML += `
+          <label class="choice">
+            <input type="radio" name="q${qIndex}" value="${cIndex}"> ${choice}
+          </label>
         `;
-      } else {
-        feedback.innerHTML = `<h3>🎉 Tất cả câu đều đúng! Giỏi quá!</h3>`;
-      }
+      });
+      container.appendChild(div);
+    });
+  }
+
+  function updateTimer() {
+    const timerEl = document.getElementById("timer");
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      timerEl.textContent = "⏰ Hết giờ!";
+      checkAnswers();
+      return;
     }
-  </script>
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    timerEl.textContent = `🕒 Thời gian còn lại: ${m}:${s < 10 ? "0" : ""}${s}`;
+    timeLeft--;
+  }
+
+  function checkAnswers() {
+    clearInterval(timerInterval);
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = "";
+    let correctCount = 0;
+
+    parsedQuestions.forEach((q, i) => {
+      const selected = document.querySelector(`input[name="q${i}"]:checked`);
+      const block = document.querySelectorAll(".question-block")[i];
+      block.classList.remove("correct", "incorrect");
+
+      if (selected && parseInt(selected.value) === q.correct) {
+        block.classList.add("correct");
+        correctCount++;
+      } else {
+        block.classList.add("incorrect");
+        resultDiv.innerHTML += `
+          <div><strong>${q.question}</strong><br>
+          Đáp án đúng: <span style="color:green">${q.choices[q.correct]}</span></div><br/>
+        `;
+      }
+    });
+
+    const score = `${correctCount} / ${parsedQuestions.length}`;
+    resultDiv.innerHTML = `<h3>🎯 Kết quả: ${score}</h3>` + resultDiv.innerHTML;
+  }
+
+  function resetQuiz() {
+    clearInterval(timerInterval);
+    document.getElementById("quizSection").classList.remove("active");
+    document.getElementById("editSection").classList.add("active");
+    document.getElementById("result").innerHTML = "";
+    document.getElementById("quizContainer").innerHTML = "";
+    document.getElementById("timer").style.display = "none";
+  }
+</script>
+
 </body>
 </html>
